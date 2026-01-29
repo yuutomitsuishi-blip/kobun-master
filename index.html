@@ -3,159 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>古文単語マスター</title>
+    <title>古文単語マスター - Dark Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* 強調箇所の文字色を黄色に変更し、単語内改行を禁止 */
         .highlight { 
-            color: #e53e3e; 
+            color: #facc15; /* Tailwind yellow-400 */
             font-weight: bold; 
-            display: inline-block; /* 強調箇所が泣き別れないように */
+            display: inline-block;
         }
-        .tab-active { border-bottom: 2px solid #4a5568; color: #2d3748; }
+        
+        /* タブの活性化スタイル */
+        .tab-active { 
+            border-bottom: 2px solid #facc15; 
+            color: #facc15; 
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         
-        /* 問題文の改行制御 */
+        /* 問題文の改行を禁止 */
         #question-text {
-            word-break: normal;
-            overflow-wrap: anywhere;
-            line-break: strict;
+            white-space: nowrap; /* 文の途中での改行を禁止 */
             text-align: center;
-            /* 日本語の文脈に応じた自然な改行（モダンブラウザ対応） */
-            word-spacing: 0.1em;
+            overflow-x: auto; /* 万が一非常に長い場合に横スクロール可能に */
+            scrollbar-width: none; /* Firefox用 */
+        }
+        #question-text::-webkit-scrollbar { display: none; } /* Chrome/Safari用 */
+
+        /* 入力フォームのスタイル調整 */
+        input[type="number"], input[type="text"], select, textarea {
+            background-color: #292524; /* stone-800 */
+            color: #f5f5f4; /* stone-100 */
+            border: 1px solid #444;
         }
     </style>
 </head>
-<body class="bg-stone-50 text-stone-800 min-h-screen font-serif">
+<body class="bg-stone-950 text-stone-100 min-h-screen font-serif">
 
 <div id="app" class="max-w-2xl mx-auto p-4">
     <!-- Header -->
-    <header class="text-center py-6">
-        <h1 class="text-3xl font-bold text-stone-700">古文単語マスター</h1>
-        <p class="text-stone-500 text-sm mt-1">重要語句を文脈で覚える</p>
+    <header class="text-center py-8">
+        <h1 class="text-4xl font-bold text-stone-200 tracking-widest">古文単語マスター</h1>
+        <p class="text-stone-500 text-sm mt-2 font-sans">重要語句を漆黒の画面で学ぶ</p>
     </header>
 
     <!-- Navigation Tabs -->
-    <nav class="flex justify-around border-b border-stone-200 mb-6">
-        <button onclick="switchTab('quiz')" id="tab-quiz" class="py-2 px-4 tab-active">クイズ</button>
-        <button onclick="switchTab('review')" id="tab-review" class="py-2 px-4">復習リスト</button>
-        <button onclick="switchTab('manage')" id="tab-manage" class="py-2 px-4">データ管理</button>
+    <nav class="flex justify-around border-b border-stone-800 mb-8 font-sans">
+        <button onclick="switchTab('quiz')" id="tab-quiz" class="py-2 px-4 tab-active transition-all">クイズ</button>
+        <button onclick="switchTab('review')" id="tab-review" class="py-2 px-4 text-stone-500">復習</button>
+        <button onclick="switchTab('manage')" id="tab-manage" class="py-2 px-4 text-stone-500">管理</button>
     </nav>
 
     <!-- Content Sections -->
     <div id="content">
         <!-- Quiz Section -->
         <section id="section-quiz" class="fade-in">
-            <div id="quiz-setup" class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
-                <h2 class="text-xl mb-4 font-bold text-stone-600">クイズを開始する</h2>
-                <div class="space-y-4">
+            <div id="quiz-setup" class="bg-stone-900 p-8 rounded-2xl shadow-xl border border-stone-800">
+                <h2 class="text-xl mb-6 font-bold text-stone-200 border-l-4 border-yellow-500 pl-3">クイズ設定</h2>
+                <div class="space-y-6">
                     <div class="flex items-center space-x-4">
-                        <label class="w-24 text-sm text-stone-500">範囲指定:</label>
-                        <input type="number" id="range-start" value="1" class="w-20 border rounded p-1 text-center bg-stone-50">
-                        <span>～</span>
-                        <input type="number" id="range-end" value="100" class="w-20 border rounded p-1 text-center bg-stone-50">
+                        <label class="w-24 text-sm text-stone-400">範囲指定:</label>
+                        <!-- 最小値を1に設定 -->
+                        <input type="number" id="range-start" value="1" min="1" class="w-20 rounded p-2 text-center outline-none focus:border-yellow-500">
+                        <span class="text-stone-600">～</span>
+                        <input type="number" id="range-end" value="100" min="1" class="w-20 rounded p-2 text-center outline-none focus:border-yellow-500">
                     </div>
                     <div class="flex items-center space-x-4">
-                        <label class="w-24 text-sm text-stone-500">出題数:</label>
-                        <select id="quiz-count" class="border rounded p-1 bg-white flex-1">
+                        <label class="w-24 text-sm text-stone-400">出題数:</label>
+                        <select id="quiz-count" class="rounded p-2 flex-1 outline-none focus:border-yellow-500">
                             <option value="5">5問</option>
                             <option value="10">10問</option>
                             <option value="20" selected>20問</option>
                             <option value="50">50問</option>
                         </select>
                     </div>
-                    <button onclick="startQuiz()" class="w-full bg-stone-700 text-white py-3 rounded-lg hover:bg-stone-800 transition shadow-md">開始</button>
+                    <button onclick="startQuiz()" class="w-full bg-yellow-600 text-stone-950 font-bold py-4 rounded-xl hover:bg-yellow-500 transition shadow-lg active:scale-95">クイズ開始</button>
                 </div>
-                <div id="quiz-stats" class="mt-6 text-center text-xs text-stone-400 italic"></div>
+                <div id="quiz-stats" class="mt-8 text-center text-xs text-stone-600 italic font-sans"></div>
             </div>
 
-            <div id="quiz-play" class="hidden space-y-4">
-                <div class="flex justify-between items-center text-xs text-stone-400 font-sans px-1">
-                    <span id="quiz-progress">第1問 / 20</span>
-                    <span id="quiz-score" class="font-bold">正解数: 0</span>
+            <div id="quiz-play" class="hidden space-y-6">
+                <div class="flex justify-between items-center text-xs text-stone-500 font-sans tracking-widest px-1">
+                    <span id="quiz-progress uppercase">Question 01</span>
+                    <span id="quiz-score" class="text-yellow-600">CORRECT: 0</span>
                 </div>
-                <!-- 問題表示エリア: 改行制御を適用 -->
-                <div class="bg-white px-6 py-10 rounded-xl shadow-sm border border-stone-100 min-h-[160px] flex items-center justify-center text-2xl md:text-3xl leading-relaxed tracking-wide" id="question-text"></div>
+                <!-- 問題表示エリア -->
+                <div class="bg-stone-900 px-4 py-16 rounded-3xl shadow-2xl border border-stone-800 flex items-center justify-center text-3xl md:text-4xl tracking-widest" id="question-text"></div>
                 
-                <div class="grid grid-cols-1 gap-3" id="options-container"></div>
-                <div id="feedback" class="hidden p-4 rounded text-center font-bold"></div>
-                <button id="next-btn" class="hidden w-full bg-stone-600 text-white py-3 rounded-lg mt-4 shadow-lg">次へ進む</button>
+                <div class="grid grid-cols-1 gap-4" id="options-container"></div>
+                <div id="feedback" class="hidden p-4 rounded-xl text-center font-bold font-sans"></div>
+                <button id="next-btn" class="hidden w-full bg-stone-100 text-stone-900 font-bold py-4 rounded-xl mt-4 shadow-lg hover:bg-white transition">次へ進む</button>
             </div>
 
-            <div id="quiz-result" class="hidden text-center space-y-6 fade-in pt-10">
-                <h2 class="text-3xl font-bold text-stone-700">結果発表</h2>
-                <div class="text-6xl font-bold text-stone-800" id="final-score">0 / 20</div>
-                <div id="result-message" class="text-lg text-stone-500"></div>
-                <button onclick="location.reload()" class="bg-stone-700 text-white px-10 py-3 rounded-full shadow-lg hover:bg-stone-800 transition">トップに戻る</button>
+            <div id="quiz-result" class="hidden text-center space-y-8 fade-in pt-10">
+                <h2 class="text-3xl font-bold text-stone-400">成績記録</h2>
+                <div class="text-8xl font-bold text-yellow-500 font-sans" id="final-score">0/20</div>
+                <div id="result-message" class="text-xl text-stone-400"></div>
+                <button onclick="location.reload()" class="bg-stone-800 text-stone-100 px-12 py-4 rounded-full border border-stone-700 hover:bg-stone-700 transition">トップへ戻る</button>
             </div>
         </section>
 
         <!-- Review Section -->
         <section id="section-review" class="hidden fade-in">
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-stone-700">以前間違えた問題</h2>
-                    <button onclick="clearReviewList()" class="text-xs text-red-400 hover:text-red-600 underline">リストを全消去</button>
+            <div class="bg-stone-900 p-6 rounded-2xl border border-stone-800">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-bold text-stone-200">要復習</h2>
+                    <button onclick="clearReviewList()" class="text-xs text-red-800 hover:text-red-500 transition underline">リスト消去</button>
                 </div>
-                <div id="review-list" class="space-y-4"></div>
+                <div id="review-list" class="space-y-6"></div>
             </div>
         </section>
 
         <!-- Manage Section -->
         <section id="section-manage" class="hidden fade-in">
-            <div class="flex mb-4 bg-stone-200 rounded-lg p-1">
-                <button id="btn-mode-single" onclick="switchManageMode('single')" class="flex-1 py-1 text-sm rounded bg-white shadow-sm font-sans">個別追加</button>
-                <button id="btn-mode-bulk" onclick="switchManageMode('bulk')" class="flex-1 py-1 text-sm rounded font-sans">一括貼り付け (GAS/Excel)</button>
+            <div class="flex mb-6 bg-stone-900 rounded-xl p-1 border border-stone-800">
+                <button id="btn-mode-single" onclick="switchManageMode('single')" class="flex-1 py-2 text-sm rounded-lg bg-stone-800 text-yellow-500 shadow-inner font-sans">手動追加</button>
+                <button id="btn-mode-bulk" onclick="switchManageMode('bulk')" class="flex-1 py-2 text-sm rounded-lg font-sans text-stone-500">一括登録</button>
             </div>
 
-            <!-- Individual Form -->
-            <div id="manage-single" class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 mb-6">
-                <h2 class="text-sm font-bold mb-3 text-stone-400 uppercase tracking-widest font-sans">新しい問題を追加</h2>
-                <div class="space-y-3">
-                    <div class="flex gap-2">
-                        <input type="number" id="new-id" placeholder="番号" class="w-20 border rounded p-2 bg-stone-50 text-center">
-                        <input type="text" id="new-text" placeholder="問題文（例: いと*をかし*。）" class="flex-1 border rounded p-2 bg-stone-50">
+            <div id="manage-single" class="bg-stone-900 p-6 rounded-2xl border border-stone-800 mb-8">
+                <h2 class="text-xs font-bold mb-4 text-stone-500 uppercase tracking-[0.2em] font-sans">新規問題の登録</h2>
+                <div class="space-y-4">
+                    <div class="flex gap-3">
+                        <input type="number" id="new-id" min="1" class="w-24 rounded-lg p-3 text-center outline-none">
+                        <input type="text" id="new-text" placeholder="本文（例: いと*をかし*。）" class="flex-1 rounded-lg p-3 outline-none">
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="new-opt1" placeholder="選択肢①" class="border rounded p-2 text-sm bg-stone-50">
-                        <input type="text" id="new-opt2" placeholder="選択肢②" class="border rounded p-2 text-sm bg-stone-50">
-                        <input type="text" id="new-opt3" placeholder="選択肢③" class="border rounded p-2 text-sm bg-stone-50">
-                        <input type="text" id="new-opt4" placeholder="選択肢④" class="border rounded p-2 text-sm bg-stone-50">
+                    <div class="grid grid-cols-2 gap-3 font-sans">
+                        <input type="text" id="new-opt1" placeholder="選択肢 1" class="rounded-lg p-3 text-sm outline-none">
+                        <input type="text" id="new-opt2" placeholder="選択肢 2" class="rounded-lg p-3 text-sm outline-none">
+                        <input type="text" id="new-opt3" placeholder="選択肢 3" class="rounded-lg p-3 text-sm outline-none">
+                        <input type="text" id="new-opt4" placeholder="選択肢 4" class="rounded-lg p-3 text-sm outline-none">
                     </div>
-                    <div class="flex items-center gap-4">
-                        <label class="text-sm text-stone-500">正解:</label>
-                        <select id="new-answer" class="border rounded p-2 flex-1 bg-stone-50">
-                            <option value="0">選択肢①</option>
-                            <option value="1">選択肢②</option>
-                            <option value="2">選択肢③</option>
-                            <option value="3">選択肢④</option>
+                    <div class="flex items-center gap-4 pt-2">
+                        <label class="text-sm text-stone-500 font-sans">正解:</label>
+                        <select id="new-answer" class="rounded-lg p-3 flex-1 outline-none">
+                            <option value="0">選択肢 1</option>
+                            <option value="1">選択肢 2</option>
+                            <option value="2">選択肢 3</option>
+                            <option value="3">選択肢 4</option>
                         </select>
-                        <button onclick="saveNewQuestion()" class="bg-stone-700 text-white px-6 py-2 rounded shadow hover:bg-stone-800">保存</button>
+                        <button onclick="saveNewQuestion()" class="bg-yellow-600 text-stone-950 px-8 py-3 rounded-xl font-bold hover:bg-yellow-500 shadow-lg transition">保存</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Bulk Form -->
-            <div id="manage-bulk" class="hidden bg-white p-4 rounded-lg shadow-sm border border-stone-200 mb-6 font-sans">
-                <h2 class="text-sm font-bold mb-2 text-stone-400 uppercase tracking-widest">一括登録 (タブ区切り)</h2>
-                <p class="text-[10px] text-stone-400 mb-3 leading-relaxed">
-                    GASまたはExcel/スプレッドシートのセル範囲をそのままコピー＆ペーストしてください。<br>
-                    形式: [ID] [本文] [選1] [選2] [選3] [選4] [正解Index]
-                </p>
-                <textarea id="bulk-input" rows="8" class="w-full border rounded p-2 text-xs font-mono mb-3 bg-stone-50" placeholder="1	いと*をかし*。	趣がある	変だ	恐ろしい	美しい	0"></textarea>
+            <div id="manage-bulk" class="hidden bg-stone-900 p-6 rounded-2xl border border-stone-800 mb-8 font-sans">
+                <h2 class="text-xs font-bold mb-3 text-stone-500 uppercase tracking-[0.2em]">一括インポート</h2>
+                <textarea id="bulk-input" rows="8" class="w-full rounded-xl p-4 text-xs font-mono mb-4 outline-none" placeholder="1	いと*をかし*。	趣がある	変だ	恐ろしい	美しい	0"></textarea>
                 <div class="flex justify-between items-center">
-                    <span id="bulk-preview-count" class="text-xs text-stone-400 italic"></span>
-                    <button onclick="processBulkInsert()" class="bg-stone-700 text-white px-6 py-2 rounded shadow hover:bg-stone-800 transition">一括追加・更新</button>
+                    <span id="bulk-preview-count" class="text-[10px] text-stone-600 uppercase tracking-tighter"></span>
+                    <button onclick="processBulkInsert()" class="bg-yellow-600 text-stone-950 px-8 py-3 rounded-xl font-bold shadow-lg transition">実行</button>
                 </div>
             </div>
 
-            <!-- List View -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
-                <h2 class="text-lg font-bold mb-4 text-stone-700">登録済み問題一覧</h2>
-                <div id="master-list" class="space-y-1 max-h-[400px] overflow-y-auto pr-2"></div>
-                <div class="mt-6 pt-4 border-t flex justify-end gap-3">
-                    <button onclick="exportData()" class="text-[10px] bg-stone-100 text-stone-500 px-3 py-1.5 rounded hover:bg-stone-200 transition">バックアップ(JSON)</button>
-                    <button onclick="resetDefault()" class="text-[10px] bg-red-50 text-red-300 px-3 py-1.5 rounded hover:bg-red-100 transition">初期状態に戻す</button>
+            <div class="bg-stone-900 p-6 rounded-2xl border border-stone-800">
+                <h2 class="text-lg font-bold mb-6 text-stone-300">データベース</h2>
+                <div id="master-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scroll"></div>
+                <div class="mt-8 pt-6 border-t border-stone-800 flex justify-end gap-4 font-sans">
+                    <button onclick="exportData()" class="text-[10px] text-stone-500 hover:text-stone-300 transition">BACKUP (JSON)</button>
+                    <button onclick="resetDefault()" class="text-[10px] text-red-900 hover:text-red-600 transition">FULL RESET</button>
                 </div>
             </div>
         </section>
@@ -163,12 +170,12 @@
 </div>
 
 <script>
-// --- Data & Initialization ---
+// --- Core Logic ---
 const DEFAULT_QUESTIONS = [
     { id: 1, text: "いと*をかし*。", options: ["趣がある", "おかしい", "恐ろしい", "美しくない"], answer: 0 },
     { id: 2, text: "冬は*つとめて*。", options: ["一晩中", "早朝", "深夜", "昼下がり"], answer: 1 },
     { id: 3, text: "顔色*いとわろし*。", options: ["とても良い", "全く普通だ", "とても良くない", "非常に美しい"], answer: 2 },
-    { id: 4, text: "ありがたきもの。舅にほめられる*婿*。", options: ["息子", "夫", "婿", "父"], answer: 2 },
+    { id: 4, text: "舅にほめられる*婿*。", options: ["息子", "夫", "婿", "父"], answer: 2 },
     { id: 5, text: "いみじく*うつくし*。", options: ["綺麗だ", "醜い", "可愛らしい", "冷たい"], answer: 2 }
 ];
 
@@ -180,10 +187,15 @@ let currentIndex = 0;
 let score = 0;
 let isAnswered = false;
 
-// --- Tab Controller ---
 function switchTab(tab) {
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
-    document.getElementById(`tab-${tab}`).classList.add('tab-active');
+    document.querySelectorAll('nav button').forEach(b => {
+        b.classList.remove('tab-active');
+        b.classList.add('text-stone-500');
+    });
+    const activeBtn = document.getElementById(`tab-${tab}`);
+    activeBtn.classList.add('tab-active');
+    activeBtn.classList.remove('text-stone-500');
+
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
     document.getElementById(`section-${tab}`).classList.remove('hidden');
     if (tab === 'manage') renderMasterList();
@@ -195,19 +207,25 @@ function switchManageMode(mode) {
     document.getElementById('manage-single').classList.toggle('hidden', !isSingle);
     document.getElementById('manage-bulk').classList.toggle('hidden', isSingle);
     
-    document.getElementById('btn-mode-single').className = isSingle ? 'flex-1 py-1 text-sm rounded bg-white shadow-sm font-sans' : 'flex-1 py-1 text-sm rounded font-sans';
-    document.getElementById('btn-mode-bulk').className = !isSingle ? 'flex-1 py-1 text-sm rounded bg-white shadow-sm font-sans' : 'flex-1 py-1 text-sm rounded font-sans';
+    document.getElementById('btn-mode-single').className = isSingle ? 'flex-1 py-2 text-sm rounded-lg bg-stone-800 text-yellow-500 shadow-inner' : 'flex-1 py-2 text-sm rounded-lg text-stone-500';
+    document.getElementById('btn-mode-bulk').className = !isSingle ? 'flex-1 py-2 text-sm rounded-lg bg-stone-800 text-yellow-500 shadow-inner' : 'flex-1 py-2 text-sm rounded-lg text-stone-500';
 }
 
-// --- Quiz Logic ---
 function startQuiz() {
-    const start = parseInt(document.getElementById('range-start').value);
-    const end = parseInt(document.getElementById('range-end').value);
+    const startInput = document.getElementById('range-start');
+    const endInput = document.getElementById('range-end');
+    
+    // 最小値1のバリデーション
+    if (parseInt(startInput.value) < 1) startInput.value = 1;
+    if (parseInt(endInput.value) < 1) endInput.value = 1;
+
+    const start = parseInt(startInput.value);
+    const end = parseInt(endInput.value);
     const count = parseInt(document.getElementById('quiz-count').value);
 
     let pool = questions.filter(q => q.id >= start && q.id <= end);
     if (pool.length === 0) {
-        alert("指定された範囲に問題が見つかりません。");
+        alert("その範囲には問題が存在しません。");
         return;
     }
 
@@ -222,10 +240,9 @@ function startQuiz() {
 function showQuestion() {
     isAnswered = false;
     const q = currentQuizSet[currentIndex];
-    document.getElementById('quiz-progress').innerText = `第${currentIndex + 1}問 / ${currentQuizSet.length}`;
-    document.getElementById('quiz-score').innerText = `正解数: ${score}`;
+    document.getElementById('quiz-progress').innerText = `Question ${(currentIndex + 1).toString().padStart(2, '0')}`;
+    document.getElementById('quiz-score').innerText = `CORRECT: ${score}`;
     
-    // 強調パーツをspanで囲む際、改行抑制のclassも付与
     const formattedText = q.text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
     document.getElementById('question-text').innerHTML = formattedText;
 
@@ -233,13 +250,13 @@ function showQuestion() {
     container.innerHTML = '';
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = "w-full text-left p-4 border-2 border-stone-200 rounded-lg hover:bg-stone-100 transition bg-white font-sans text-stone-700 active:scale-[0.98]";
+        btn.className = "w-full text-left p-5 border border-stone-800 rounded-2xl hover:bg-stone-800 transition bg-stone-900 text-stone-300 font-sans active:scale-[0.98]";
         btn.innerText = `${idx + 1}. ${opt}`;
         btn.onclick = () => checkAnswer(idx);
         container.appendChild(btn);
     });
 
-    document.getElementById('feedback').className = "hidden p-4 rounded text-center font-bold";
+    document.getElementById('feedback').className = "hidden p-4 rounded-xl text-center font-bold";
     document.getElementById('next-btn').classList.add('hidden');
 }
 
@@ -254,14 +271,14 @@ function checkAnswer(idx) {
 
     if (isCorrect) {
         score++;
-        feedback.innerText = "正解！";
-        feedback.className = "block p-4 rounded text-center font-bold bg-green-50 text-green-700 fade-in font-sans";
-        buttons[idx].classList.add('border-green-500', 'bg-green-50');
+        feedback.innerText = "正解";
+        feedback.className = "block p-4 rounded-xl text-center font-bold bg-green-900/30 text-green-400 fade-in";
+        buttons[idx].classList.add('border-green-700', 'bg-green-900/20');
     } else {
-        feedback.innerText = `不正解（正解: ${q.options[q.answer]}）`;
-        feedback.className = "block p-4 rounded text-center font-bold bg-red-50 text-red-700 fade-in font-sans";
-        buttons[idx].classList.add('border-red-500', 'bg-red-50');
-        buttons[q.answer].classList.add('border-green-500', 'bg-green-50');
+        feedback.innerText = `不正解 (正解: ${q.options[q.answer]})`;
+        feedback.className = "block p-4 rounded-xl text-center font-bold bg-red-900/30 text-red-400 fade-in";
+        buttons[idx].classList.add('border-red-700', 'bg-red-900/20');
+        buttons[q.answer].classList.add('border-green-700', 'bg-green-900/20');
         
         if (!reviewList.find(r => r.id === q.id)) {
             reviewList.push(q);
@@ -283,16 +300,16 @@ document.getElementById('next-btn').onclick = () => {
 function showResult() {
     document.getElementById('quiz-play').classList.add('hidden');
     document.getElementById('quiz-result').classList.remove('hidden');
-    document.getElementById('final-score').innerText = `${score} / ${currentQuizSet.length}`;
+    document.getElementById('final-score').innerText = `${score}/${currentQuizSet.length}`;
     
     const ratio = score / currentQuizSet.length;
-    let msg = ratio === 1 ? "完璧です！見事です。" : ratio >= 0.7 ? "素晴らしい結果です！" : "継続は力なり。復習しましょう。";
+    let msg = ratio === 1 ? "皆伝。完璧です。" : ratio >= 0.7 ? "上出来です。" : "精進しましょう。";
     document.getElementById('result-message').innerText = msg;
 }
 
-// --- Data Management Logic ---
 function saveNewQuestion() {
-    const id = parseInt(document.getElementById('new-id').value);
+    const idVal = document.getElementById('new-id').value;
+    const id = parseInt(idVal < 1 ? 1 : idVal);
     const text = document.getElementById('new-text').value;
     const opts = [
         document.getElementById('new-opt1').value,
@@ -303,7 +320,7 @@ function saveNewQuestion() {
     const ans = parseInt(document.getElementById('new-answer').value);
 
     if (!id || !text || opts.some(o => !o)) {
-        alert("全ての項目を入力してください。");
+        alert("不備があります。");
         return;
     }
 
@@ -319,17 +336,13 @@ function processBulkInsert() {
 
     const lines = rawData.split('\n');
     let addedCount = 0;
-    let errorLines = [];
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
         const parts = line.split('\t');
-        if (parts.length < 7) {
-            errorLines.push(index + 1);
-            return;
-        }
+        if (parts.length < 7) return;
 
         const q = {
-            id: parseInt(parts[0].trim()),
+            id: Math.max(1, parseInt(parts[0].trim())),
             text: parts[1].trim(),
             options: [parts[2].trim(), parts[3].trim(), parts[4].trim(), parts[5].trim()],
             answer: parseInt(parts[6].trim())
@@ -338,17 +351,12 @@ function processBulkInsert() {
         if (!isNaN(q.id) && q.text && !isNaN(q.answer)) {
             upsertQuestion(q);
             addedCount++;
-        } else {
-            errorLines.push(index + 1);
         }
     });
 
     localStorage.setItem('kobun_questions', JSON.stringify(questions));
     renderMasterList();
-    
-    let resultMsg = `${addedCount} 件のデータを登録しました。`;
-    if (errorLines.length > 0) resultMsg += `\n(エラー行: ${errorLines.join(', ')})`;
-    alert(resultMsg);
+    alert(`${addedCount}件 完了`);
     document.getElementById('bulk-input').value = '';
 }
 
@@ -368,55 +376,50 @@ function renderMasterList() {
     list.innerHTML = '';
     questions.forEach(q => {
         const item = document.createElement('div');
-        item.className = "flex justify-between items-center p-2.5 border-b text-sm bg-white hover:bg-stone-50 rounded transition mb-1 border-stone-100";
+        item.className = "flex justify-between items-center p-3 border-b border-stone-800 text-sm bg-stone-900/50 hover:bg-stone-800 rounded-lg transition mb-1";
         item.innerHTML = `
-            <span class="font-mono w-8 text-stone-300 text-xs">${q.id}</span>
-            <span class="flex-1 truncate mx-2 text-stone-600">${q.text.replace(/\*/g, '')}</span>
-            <button onclick="deleteQuestion(${q.id})" class="text-red-300 hover:text-red-500 transition px-2">削除</button>
+            <span class="font-mono w-10 text-stone-700 text-[10px]">${q.id.toString().padStart(3, '0')}</span>
+            <span class="flex-1 truncate mx-2 text-stone-400">${q.text.replace(/\*/g, '')}</span>
+            <button onclick="deleteQuestion(${q.id})" class="text-red-900 hover:text-red-600 transition px-2">削除</button>
         `;
         list.appendChild(item);
     });
-    document.getElementById('quiz-stats').innerText = `現在 ${questions.length} 問の問題が利用可能です`;
+    document.getElementById('quiz-stats').innerText = `Database contains ${questions.length} questions.`;
 }
 
 function deleteQuestion(id) {
-    if (!confirm(`問題番号 ${id} を削除しますか？`)) return;
+    if (!confirm(`No.${id} を削除？`)) return;
     questions = questions.filter(q => q.id !== id);
     localStorage.setItem('kobun_questions', JSON.stringify(questions));
     renderMasterList();
 }
 
 function resetDefault() {
-    if (!confirm("データをすべてリセットし、初期状態に戻しますか？")) return;
+    if (!confirm("全データ消去？")) return;
     localStorage.removeItem('kobun_questions');
     location.reload();
 }
 
-// --- Review List UI ---
 function renderReviewList() {
     const list = document.getElementById('review-list');
     list.innerHTML = '';
     if (reviewList.length === 0) {
-        list.innerHTML = `
-            <div class="text-center py-12">
-                <p class="text-stone-300 italic font-sans text-sm mb-2">間違えた問題はありません</p>
-                <div class="text-3xl opacity-20">❀</div>
-            </div>`;
+        list.innerHTML = `<div class="text-center py-20 text-stone-700 font-sans tracking-widest uppercase">No Data</div>`;
         return;
     }
 
     reviewList.forEach((q) => {
         const item = document.createElement('div');
-        item.className = "p-5 border border-stone-100 rounded-xl bg-white shadow-sm space-y-3 relative fade-in";
+        item.className = "p-6 border border-stone-800 rounded-2xl bg-stone-900/50 shadow-sm space-y-4 relative fade-in";
         const formattedText = q.text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
         item.innerHTML = `
             <div class="flex justify-between items-start font-sans">
-                <span class="text-[10px] font-bold bg-stone-100 text-stone-400 px-2 py-0.5 rounded">ID:${q.id}</span>
-                <button onclick="removeFromReview(${q.id})" class="text-[10px] text-stone-400 hover:text-stone-600 border px-2 py-0.5 rounded transition">マスターした</button>
+                <span class="text-[10px] font-bold bg-stone-800 text-stone-500 px-3 py-1 rounded-full uppercase tracking-tighter">ID:${q.id}</span>
+                <button onclick="removeFromReview(${q.id})" class="text-[10px] text-stone-600 hover:text-yellow-600 border border-stone-800 px-3 py-1 rounded-full transition">完了</button>
             </div>
-            <p class="text-xl leading-relaxed">${formattedText}</p>
-            <div class="pt-2 border-t border-stone-50 text-xs text-stone-400 font-sans flex items-center">
-                <span class="bg-stone-50 px-2 py-1 rounded">正解: <strong class="text-stone-700 ml-1">${q.options[q.answer]}</strong></span>
+            <p class="text-2xl leading-relaxed text-stone-200">${formattedText}</p>
+            <div class="pt-4 border-t border-stone-800 text-xs text-stone-500 font-sans">
+                <span class="bg-stone-800 px-3 py-2 rounded-lg">正解: <strong class="text-stone-300 ml-1 font-serif text-sm">${q.options[q.answer]}</strong></span>
             </div>
         `;
         list.appendChild(item);
@@ -430,7 +433,7 @@ function removeFromReview(id) {
 }
 
 function clearReviewList() {
-    if (!confirm("復習リストを空にしますか？")) return;
+    if (!confirm("クリア？")) return;
     reviewList = [];
     localStorage.setItem('kobun_review', JSON.stringify(reviewList));
     renderReviewList();
@@ -442,14 +445,13 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `kobun_backup_${new Date().toLocaleDateString('ja-JP').replace(/\//g, '-')}.json`;
+    a.download = `kobun_dark_backup.json`;
     a.click();
 }
 
-// Init
+// Initial Run
 renderMasterList();
 document.getElementById('new-id').value = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
-
 </script>
 </body>
 </html>
