@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>古文単語マスター - Theme Switcher</title>
+    <title>古文単語マスター - Management Full</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 基本アニメーション */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
 
-        /* 問題文の改行禁止設定 */
+        /* 問題文の設定: 中央揃えで改行を許可 */
         #question-text {
-            white-space: nowrap;
+            word-break: break-all;
+            overflow-wrap: break-word;
             text-align: center;
-            overflow-x: auto;
-            scrollbar-width: none;
+            line-height: 1.6;
         }
-        #question-text::-webkit-scrollbar { display: none; }
 
-        /* ダークモード（デフォルト） */
+        /* ダークモード */
         body.dark-mode { background-color: #0c0a09; color: #f5f5f4; }
-        .dark-mode .highlight { color: #facc15; font-weight: bold; display: inline-block; }
+        .dark-mode .highlight { color: #facc15; font-weight: bold; }
         .dark-mode .card { background-color: #1c1917; border-color: #292524; }
         .dark-mode .tab-active { border-bottom: 2px solid #facc15; color: #facc15; }
         .dark-mode input, .dark-mode select, .dark-mode textarea { background-color: #292524; color: #f5f5f4; border: 1px solid #444; }
@@ -29,16 +28,13 @@
 
         /* ライトモード */
         body.light-mode { background-color: #fafaf9; color: #1c1917; }
-        .light-mode .highlight { color: #dc2626; font-weight: bold; display: inline-block; } /* 赤色 */
+        .light-mode .highlight { color: #dc2626; font-weight: bold; }
         .light-mode .card { background-color: #ffffff; border-color: #d6d3d1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .light-mode .tab-active { border-bottom: 2px solid #dc2626; color: #dc2626; }
         .light-mode input, .light-mode select, .light-mode textarea { background-color: #ffffff; color: #1c1917; border: 1px solid #d6d3d1; }
-        .light-mode .text-stone-500 { color: #57534e; }
-        .light-mode .text-stone-400 { color: #78716c; }
         /* ライトモード時の選択肢ホバー視認性向上 */
         .light-mode .option-btn:hover { background-color: #e7e5e4; border-color: #a8a29e; }
 
-        /* カスタムスクロールバー（管理画面用） */
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
     </style>
@@ -46,133 +42,122 @@
 <body class="dark-mode min-h-screen font-serif transition-colors duration-300">
 
 <div id="app" class="max-w-2xl mx-auto p-4">
-    <!-- Header with Settings -->
-    <header class="relative text-center py-8">
+    <!-- Header -->
+    <header class="relative text-center py-6">
         <div class="absolute right-0 top-4">
-            <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors border border-stone-300 dark:border-stone-800" id="theme-toggle-btn" title="テーマ切り替え">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors border border-stone-300 dark:border-stone-800" id="theme-toggle-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
             </button>
         </div>
-        <h1 class="text-4xl font-bold tracking-widest">古文単語マスター</h1>
-        <p class="text-stone-500 text-sm mt-2 font-sans">重要語句をクイズで学ぶ</p>
+        <h1 class="text-3xl font-bold tracking-widest">古文単語マスター</h1>
     </header>
 
-    <!-- Navigation Tabs -->
+    <!-- Navigation -->
     <nav class="flex justify-around border-b border-stone-300 dark:border-stone-800 mb-8 font-sans">
         <button onclick="switchTab('quiz')" id="tab-quiz" class="py-2 px-4 tab-active transition-all">クイズ</button>
         <button onclick="switchTab('review')" id="tab-review" class="py-2 px-4 text-stone-500">復習</button>
         <button onclick="switchTab('manage')" id="tab-manage" class="py-2 px-4 text-stone-500">管理</button>
     </nav>
 
-    <!-- Content Sections -->
     <div id="content">
         <!-- Quiz Section -->
         <section id="section-quiz" class="fade-in">
             <div id="quiz-setup" class="card p-8 rounded-2xl border">
-                <h2 class="text-xl mb-6 font-bold border-l-4 border-yellow-500 light:border-red-600 pl-3">クイズ設定</h2>
+                <h2 class="text-lg mb-6 font-bold border-l-4 border-yellow-500 pl-3">クイズ設定</h2>
                 <div class="space-y-6">
                     <div class="flex items-center space-x-4">
-                        <label class="w-24 text-sm text-stone-400">範囲指定:</label>
-                        <input type="number" id="range-start" value="1" min="1" class="w-20 rounded p-2 text-center outline-none focus:border-yellow-500">
+                        <label class="w-24 text-sm text-stone-400">範囲:</label>
+                        <input type="number" id="range-start" value="1" class="w-20 rounded p-2 text-center outline-none">
                         <span class="text-stone-600">～</span>
-                        <input type="number" id="range-end" value="100" min="1" class="w-20 rounded p-2 text-center outline-none focus:border-yellow-500">
+                        <input type="number" id="range-end" value="100" class="w-20 rounded p-2 text-center outline-none">
                     </div>
                     <div class="flex items-center space-x-4">
                         <label class="w-24 text-sm text-stone-400">出題数:</label>
-                        <select id="quiz-count" class="rounded p-2 flex-1 outline-none focus:border-yellow-500">
+                        <select id="quiz-count" class="rounded p-2 flex-1 outline-none">
                             <option value="5">5問</option>
-                            <option value="10">10問</option>
-                            <option value="20" selected>20問</option>
-                            <option value="50">50問</option>
+                            <option value="10" selected>10問</option>
+                            <option value="20">20問</option>
                         </select>
                     </div>
                     <button onclick="startQuiz()" class="w-full bg-stone-800 text-stone-100 dark:bg-yellow-600 dark:text-stone-950 font-bold py-4 rounded-xl hover:opacity-90 transition shadow-lg active:scale-95">クイズ開始</button>
                 </div>
-                <div id="quiz-stats" class="mt-8 text-center text-xs text-stone-600 italic font-sans"></div>
             </div>
 
             <div id="quiz-play" class="hidden space-y-6">
-                <div class="flex justify-between items-center text-xs text-stone-500 font-sans tracking-widest px-1">
-                    <span id="quiz-progress" class="uppercase">Question 01</span>
-                    <span id="quiz-score" class="font-bold">CORRECT: 0</span>
+                <div class="flex justify-between items-center text-[10px] text-stone-500 font-sans tracking-widest px-1">
+                    <span id="quiz-progress">QUESTION 01</span>
+                    <span id="quiz-score">SCORE: 0</span>
                 </div>
-                <div class="card px-4 py-16 rounded-3xl border flex items-center justify-center text-3xl md:text-4xl tracking-widest" id="question-text"></div>
-                
-                <div class="grid grid-cols-1 gap-4" id="options-container"></div>
-                <div id="feedback" class="hidden p-4 rounded-xl text-center font-bold font-sans"></div>
+                <div class="card px-6 py-12 rounded-3xl border flex items-center justify-center text-xl md:text-2xl" id="question-text"></div>
+                <div class="grid grid-cols-1 gap-3" id="options-container"></div>
+                <div id="feedback" class="hidden p-4 rounded-xl text-center font-bold font-sans text-sm"></div>
                 <button id="next-btn" class="hidden w-full bg-stone-800 text-stone-100 dark:bg-stone-100 dark:text-stone-900 font-bold py-4 rounded-xl mt-4 shadow-lg hover:opacity-90 transition">次へ進む</button>
             </div>
 
             <div id="quiz-result" class="hidden text-center space-y-8 fade-in pt-10">
-                <h2 class="text-3xl font-bold text-stone-400">成績記録</h2>
-                <div class="text-8xl font-bold font-sans" id="final-score" style="color: var(--highlight-color, inherit)">0/20</div>
-                <div id="result-message" class="text-xl text-stone-400"></div>
-                <button onclick="location.reload()" class="bg-stone-200 text-stone-900 dark:bg-stone-800 dark:text-stone-100 px-12 py-4 rounded-full border border-stone-300 dark:border-stone-700 hover:opacity-80 transition">トップへ戻る</button>
+                <h2 class="text-2xl font-bold text-stone-400">成績記録</h2>
+                <div class="text-7xl font-bold font-sans" id="final-score">0/0</div>
+                <button onclick="location.reload()" class="bg-stone-200 text-stone-900 dark:bg-stone-800 dark:text-stone-100 px-12 py-4 rounded-full border hover:opacity-80 transition">トップへ戻る</button>
             </div>
         </section>
 
         <!-- Review Section -->
         <section id="section-review" class="hidden fade-in">
             <div class="card p-6 rounded-2xl border">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xl font-bold">要復習</h2>
-                    <button onclick="clearReviewList()" class="text-xs text-red-500 hover:underline transition font-sans">リスト消去</button>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">要復習リスト</h2>
+                    <button onclick="clearReviewList()" class="text-xs text-red-500 hover:underline">クリア</button>
                 </div>
-                <div id="review-list" class="space-y-6"></div>
+                <div id="review-list" class="space-y-4"></div>
             </div>
         </section>
 
         <!-- Manage Section -->
         <section id="section-manage" class="hidden fade-in">
-            <div class="flex mb-6 card rounded-xl p-1 border">
-                <button id="btn-mode-single" onclick="switchManageMode('single')" class="flex-1 py-2 text-sm rounded-lg tab-active font-sans">手動追加</button>
-                <button id="btn-mode-bulk" onclick="switchManageMode('bulk')" class="flex-1 py-2 text-sm rounded-lg text-stone-500 font-sans">一括登録</button>
+            <div class="flex mb-4 card rounded-xl p-1 border">
+                <button id="btn-mode-single" onclick="switchManageMode('single')" class="flex-1 py-2 text-xs rounded-lg tab-active font-sans">個別追加</button>
+                <button id="btn-mode-bulk" onclick="switchManageMode('bulk')" class="flex-1 py-2 text-xs rounded-lg text-stone-500 font-sans">一括登録</button>
             </div>
 
-            <div id="manage-single" class="card p-6 rounded-2xl border mb-8">
-                <h2 class="text-xs font-bold mb-4 text-stone-500 uppercase tracking-[0.2em] font-sans">新規問題の登録</h2>
+            <div id="manage-single" class="card p-6 rounded-2xl border mb-6">
                 <div class="space-y-4">
-                    <div class="flex gap-3">
-                        <input type="number" id="new-id" min="1" class="w-24 rounded-lg p-3 text-center outline-none">
-                        <input type="text" id="new-text" placeholder="本文（例: いと*をかし*。）" class="flex-1 rounded-lg p-3 outline-none">
+                    <div class="flex gap-2">
+                        <input type="number" id="new-id" placeholder="ID" class="w-20 rounded-lg p-3 text-center outline-none">
+                        <input type="text" id="new-text" placeholder="本文（強調は *単語*）" class="flex-1 rounded-lg p-3 outline-none">
                     </div>
-                    <div class="grid grid-cols-2 gap-3 font-sans">
-                        <input type="text" id="new-opt1" placeholder="選択肢 1" class="rounded-lg p-3 text-sm outline-none">
-                        <input type="text" id="new-opt2" placeholder="選択肢 2" class="rounded-lg p-3 text-sm outline-none">
-                        <input type="text" id="new-opt3" placeholder="選択肢 3" class="rounded-lg p-3 text-sm outline-none">
-                        <input type="text" id="new-opt4" placeholder="選択肢 4" class="rounded-lg p-3 text-sm outline-none">
+                    <div class="grid grid-cols-2 gap-2 font-sans">
+                        <input type="text" id="new-opt1" placeholder="選択肢1" class="rounded-lg p-2 text-sm outline-none">
+                        <input type="text" id="new-opt2" placeholder="選択肢2" class="rounded-lg p-2 text-sm outline-none">
+                        <input type="text" id="new-opt3" placeholder="選択肢3" class="rounded-lg p-2 text-sm outline-none">
+                        <input type="text" id="new-opt4" placeholder="選択肢4" class="rounded-lg p-2 text-sm outline-none">
                     </div>
-                    <div class="flex items-center gap-4 pt-2">
-                        <label class="text-sm text-stone-500 font-sans">正解:</label>
-                        <select id="new-answer" class="rounded-lg p-3 flex-1 outline-none">
-                            <option value="0">選択肢 1</option>
-                            <option value="1">選択肢 2</option>
-                            <option value="2">選択肢 3</option>
-                            <option value="3">選択肢 4</option>
+                    <div class="flex items-center gap-4">
+                        <label class="text-xs text-stone-500">正解番号(0-3):</label>
+                        <select id="new-answer" class="rounded-lg p-2 flex-1 outline-none">
+                            <option value="0">1番</option>
+                            <option value="1">2番</option>
+                            <option value="2">3番</option>
+                            <option value="3">4番</option>
                         </select>
-                        <button onclick="saveNewQuestion()" class="bg-stone-800 text-stone-100 dark:bg-yellow-600 dark:text-stone-950 px-8 py-3 rounded-xl font-bold shadow-lg transition">保存</button>
+                        <button onclick="saveNewQuestion()" class="bg-stone-800 text-stone-100 dark:bg-yellow-600 dark:text-stone-950 px-6 py-2 rounded-xl font-bold">保存</button>
                     </div>
                 </div>
             </div>
 
-            <div id="manage-bulk" class="hidden card p-6 rounded-2xl border mb-8 font-sans">
-                <h2 class="text-xs font-bold mb-3 text-stone-500 uppercase tracking-[0.2em]">一括インポート</h2>
-                <textarea id="bulk-input" rows="8" class="w-full rounded-xl p-4 text-xs font-mono mb-4 outline-none" placeholder="1	いと*をかし*。	趣がある	変だ	恐ろしい	美しい	0"></textarea>
-                <div class="flex justify-between items-center">
-                    <span id="bulk-preview-count" class="text-[10px] text-stone-600 uppercase tracking-tighter"></span>
-                    <button onclick="processBulkInsert()" class="bg-stone-800 text-stone-100 dark:bg-yellow-600 dark:text-stone-950 px-8 py-3 rounded-xl font-bold shadow-lg transition">実行</button>
-                </div>
+            <div id="manage-bulk" class="hidden card p-6 rounded-2xl border mb-6">
+                <p class="text-[10px] text-stone-500 mb-2">形式: 質問番号　質問文　選択肢1　選択肢2　選択肢3　選択肢4　正解番号</p>
+                <textarea id="bulk-input" rows="6" class="w-full rounded-xl p-4 text-xs font-mono outline-none mb-3" placeholder="1	いと*をかし*。	趣がある	変だ	恐ろしい	美しい	0"></textarea>
+                <button onclick="processBulkInsert()" class="w-full bg-stone-800 text-stone-100 dark:bg-yellow-600 dark:text-stone-950 py-3 rounded-xl font-bold">一括実行</button>
             </div>
 
             <div class="card p-6 rounded-2xl border">
-                <h2 class="text-lg font-bold mb-6">データベース</h2>
-                <div id="master-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scroll"></div>
-                <div class="mt-8 pt-6 border-t border-stone-300 dark:border-stone-800 flex justify-end gap-4 font-sans">
-                    <button onclick="exportData()" class="text-[10px] text-stone-500 hover:opacity-70 transition">BACKUP (JSON)</button>
-                    <button onclick="resetDefault()" class="text-[10px] text-red-600 hover:opacity-70 transition">FULL RESET</button>
+                <h2 class="text-lg font-bold mb-4">登録済み問題一覧</h2>
+                <div id="master-list" class="space-y-1 max-h-60 overflow-y-auto custom-scroll pr-2"></div>
+                <div class="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 flex justify-between">
+                    <button onclick="exportData()" class="text-[10px] text-stone-500">エクスポート</button>
+                    <button onclick="resetDefault()" class="text-[10px] text-red-500">全初期化</button>
                 </div>
             </div>
         </section>
@@ -180,29 +165,23 @@
 </div>
 
 <script>
-// --- Core Logic ---
+// --- Core Data ---
 const DEFAULT_QUESTIONS = [
     { id: 1, text: "いと*をかし*。", options: ["趣がある", "おかしい", "恐ろしい", "美しくない"], answer: 0 },
     { id: 2, text: "冬は*つとめて*。", options: ["一晩中", "早朝", "深夜", "昼下がり"], answer: 1 },
-    { id: 3, text: "顔色*いとわろし*。", options: ["とても良い", "全く普通だ", "とても良くない", "非常に美しい"], answer: 2 },
-    { id: 4, text: "舅にほめられる*婿*。", options: ["息子", "夫", "婿", "父"], answer: 2 },
-    { id: 5, text: "いみじく*うつくし*。", options: ["綺麗だ", "醜い", "可愛らしい", "冷たい"], answer: 2 }
+    { id: 3, text: "顔色*いとわろし*。", options: ["とても良い", "普通だ", "非常に良くない", "美しい"], answer: 2 },
+    { id: 4, text: "いみじく*うつくし*。", options: ["綺麗だ", "醜い", "可愛らしい", "冷たい"], answer: 2 },
+    { id: 5, text: "心*あやなし*。", options: ["理由がない", "つまらない", "わけがわからない", "恐ろしい"], answer: 2 }
 ];
 
 let questions = JSON.parse(localStorage.getItem('kobun_questions')) || DEFAULT_QUESTIONS;
 let reviewList = JSON.parse(localStorage.getItem('kobun_review')) || [];
-
 let currentQuizSet = [];
 let currentIndex = 0;
 let score = 0;
 let isAnswered = false;
 
-// --- Theme Management ---
-function toggleTheme() {
-    const isDark = document.body.classList.contains('dark-mode');
-    setTheme(isDark ? 'light' : 'dark');
-}
-
+// --- Theme ---
 function setTheme(theme) {
     if (theme === 'dark') {
         document.body.classList.add('dark-mode');
@@ -215,10 +194,8 @@ function setTheme(theme) {
     }
     localStorage.setItem('kobun_theme', theme);
 }
-
-// Initial theme check
-const savedTheme = localStorage.getItem('kobun_theme') || 'dark';
-setTheme(savedTheme);
+function toggleTheme() { setTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark'); }
+setTheme(localStorage.getItem('kobun_theme') || 'dark');
 
 // --- Navigation ---
 function switchTab(tab) {
@@ -226,48 +203,31 @@ function switchTab(tab) {
         b.classList.remove('tab-active');
         b.classList.add('text-stone-500');
     });
-    const activeBtn = document.getElementById(`tab-${tab}`);
-    activeBtn.classList.add('tab-active');
-    activeBtn.classList.remove('text-stone-500');
-
+    document.getElementById(`tab-${tab}`).classList.add('tab-active');
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
     document.getElementById(`section-${tab}`).classList.remove('hidden');
-    if (tab === 'manage') renderMasterList();
-    if (tab === 'review') renderReviewList();
+    if(tab === 'manage') renderMasterList();
+    if(tab === 'review') renderReviewList();
 }
 
 function switchManageMode(mode) {
     const isSingle = mode === 'single';
     document.getElementById('manage-single').classList.toggle('hidden', !isSingle);
     document.getElementById('manage-bulk').classList.toggle('hidden', isSingle);
-    
     document.getElementById('btn-mode-single').classList.toggle('tab-active', isSingle);
-    document.getElementById('btn-mode-single').classList.toggle('text-stone-500', !isSingle);
     document.getElementById('btn-mode-bulk').classList.toggle('tab-active', !isSingle);
-    document.getElementById('btn-mode-bulk').classList.toggle('text-stone-500', isSingle);
 }
 
 // --- Quiz Logic ---
 function startQuiz() {
-    const startInput = document.getElementById('range-start');
-    const endInput = document.getElementById('range-end');
-    
-    if (parseInt(startInput.value) < 1) startInput.value = 1;
-    if (parseInt(endInput.value) < 1) endInput.value = 1;
-
-    const start = parseInt(startInput.value);
-    const end = parseInt(endInput.value);
+    const start = parseInt(document.getElementById('range-start').value);
+    const end = parseInt(document.getElementById('range-end').value);
     const count = parseInt(document.getElementById('quiz-count').value);
-
     let pool = questions.filter(q => q.id >= start && q.id <= end);
-    if (pool.length === 0) {
-        alert("その範囲には問題が存在しません。");
-        return;
-    }
-
+    if (pool.length === 0) return alert("その範囲に問題がありません");
+    
     currentQuizSet = pool.sort(() => Math.random() - 0.5).slice(0, count);
-    currentIndex = 0;
-    score = 0;
+    currentIndex = 0; score = 0;
     document.getElementById('quiz-setup').classList.add('hidden');
     document.getElementById('quiz-play').classList.remove('hidden');
     showQuestion();
@@ -276,92 +236,80 @@ function startQuiz() {
 function showQuestion() {
     isAnswered = false;
     const q = currentQuizSet[currentIndex];
-    
-    const progressEl = document.getElementById('quiz-progress');
-    const scoreEl = document.getElementById('quiz-score');
-    if (progressEl) progressEl.innerText = `Question ${(currentIndex + 1).toString().padStart(2, '0')}`;
-    if (scoreEl) scoreEl.innerText = `CORRECT: ${score}`;
+    document.getElementById('quiz-progress').innerText = `QUESTION ${(currentIndex + 1).toString().padStart(2, '0')}`;
+    document.getElementById('quiz-score').innerText = `SCORE: ${score}`;
     
     const formattedText = q.text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
-    const questionTextEl = document.getElementById('question-text');
-    if (questionTextEl) questionTextEl.innerHTML = formattedText;
+    document.getElementById('question-text').innerHTML = formattedText;
 
     const container = document.getElementById('options-container');
-    if (container) {
-        container.innerHTML = '';
-        q.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            // クラス名に option-btn を追加してCSSで制御
-            btn.className = "card option-btn w-full text-left p-5 border rounded-2xl transition font-sans active:scale-[0.98]";
-            btn.innerText = `${idx + 1}. ${opt}`;
-            btn.onclick = () => checkAnswer(idx);
-            container.appendChild(btn);
-        });
-    }
+    container.innerHTML = '';
+    q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "card option-btn w-full text-center p-4 border rounded-2xl transition font-sans text-sm md:text-base active:scale-[0.98]";
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(idx);
+        container.appendChild(btn);
+    });
 
-    const feedbackEl = document.getElementById('feedback');
-    if (feedbackEl) feedbackEl.className = "hidden p-4 rounded-xl text-center font-bold font-sans";
-    
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) nextBtn.classList.add('hidden');
+    document.getElementById('feedback').classList.add('hidden');
+    document.getElementById('next-btn').classList.add('hidden');
 }
 
 function checkAnswer(idx) {
     if (isAnswered) return;
     isAnswered = true;
-    
     const q = currentQuizSet[currentIndex];
     const isCorrect = idx === q.answer;
+    const isDark = document.body.classList.contains('dark-mode');
     const feedback = document.getElementById('feedback');
     const buttons = document.querySelectorAll('#options-container button');
-    const isDark = document.body.classList.contains('dark-mode');
 
     if (isCorrect) {
         score++;
         feedback.innerText = "正解";
-        feedback.className = `block p-4 rounded-xl text-center font-bold border fade-in ${
-            isDark ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-green-100 text-green-700 border-green-200'
-        }`;
-        buttons[idx].classList.add(isDark ? 'border-green-600' : 'border-green-500', isDark ? 'bg-green-500/5' : 'bg-green-50');
+        feedback.className = `block p-3 rounded-xl text-center font-bold border fade-in ${isDark ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-green-100 text-green-700 border-green-200'}`;
     } else {
         feedback.innerText = `不正解 (正解: ${q.options[q.answer]})`;
-        feedback.className = `block p-4 rounded-xl text-center font-bold border fade-in ${
-            isDark ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-red-100 text-red-700 border-red-200'
-        }`;
-        buttons[idx].classList.add(isDark ? 'border-red-600' : 'border-red-500', isDark ? 'bg-red-500/5' : 'bg-red-50');
-        buttons[q.answer].classList.add(isDark ? 'border-green-600' : 'border-green-500', isDark ? 'bg-green-500/5' : 'bg-green-50');
-        
+        feedback.className = `block p-3 rounded-xl text-center font-bold border fade-in ${isDark ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-red-100 text-red-700 border-red-200'}`;
         if (!reviewList.find(r => r.id === q.id)) {
             reviewList.push(q);
             localStorage.setItem('kobun_review', JSON.stringify(reviewList));
         }
     }
+    buttons[idx].classList.add(isDark ? 'border-stone-500' : 'border-stone-400');
     document.getElementById('next-btn').classList.remove('hidden');
 }
 
 document.getElementById('next-btn').onclick = () => {
     currentIndex++;
-    if (currentIndex < currentQuizSet.length) {
-        showQuestion();
-    } else {
-        showResult();
+    if (currentIndex < currentQuizSet.length) showQuestion();
+    else {
+        document.getElementById('quiz-play').classList.add('hidden');
+        document.getElementById('quiz-result').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `${score}/${currentQuizSet.length}`;
     }
 };
 
-function showResult() {
-    document.getElementById('quiz-play').classList.add('hidden');
-    document.getElementById('quiz-result').classList.remove('hidden');
-    document.getElementById('final-score').innerText = `${score}/${currentQuizSet.length}`;
-    
-    const ratio = score / currentQuizSet.length;
-    let msg = ratio === 1 ? "皆伝。完璧です。" : ratio >= 0.7 ? "上出来です。" : "精進しましょう。";
-    document.getElementById('result-message').innerText = msg;
+// --- Management Logic ---
+function renderMasterList() {
+    const list = document.getElementById('master-list');
+    list.innerHTML = '';
+    questions.forEach(q => {
+        const d = document.createElement('div');
+        d.className = "flex justify-between items-center p-2 text-xs border-b border-stone-200 dark:border-stone-800";
+        d.innerHTML = `
+            <span class="text-stone-500 w-8">${q.id}</span>
+            <span class="flex-1 truncate mx-2">${q.text.replace(/\*/g, '')}</span>
+            <button onclick="deleteQuestion(${q.id})" class="text-red-500">削除</button>
+        `;
+        list.appendChild(d);
+    });
+    document.getElementById('new-id').value = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
 }
 
-// --- Management Logic ---
 function saveNewQuestion() {
-    const idVal = document.getElementById('new-id').value;
-    const id = parseInt(idVal < 1 ? 1 : idVal);
+    const id = parseInt(document.getElementById('new-id').value);
     const text = document.getElementById('new-text').value;
     const opts = [
         document.getElementById('new-opt1').value,
@@ -371,149 +319,63 @@ function saveNewQuestion() {
     ];
     const ans = parseInt(document.getElementById('new-answer').value);
 
-    if (!id || !text || opts.some(o => !o)) {
-        alert("不備があります。");
-        return;
-    }
+    if(!id || !text || opts.some(o => !o)) return alert("全項目入力してください");
 
-    upsertQuestion({ id, text, options: opts, answer: ans });
-    renderMasterList();
-    document.getElementById('new-id').value = id + 1;
-    document.getElementById('new-text').value = '';
-    document.getElementById('new-opt1').value = '';
-    document.getElementById('new-opt2').value = '';
-    document.getElementById('new-opt3').value = '';
-    document.getElementById('new-opt4').value = '';
-}
+    const index = questions.findIndex(q => q.id === id);
+    if(index > -1) questions[index] = { id, text, options: opts, answer: ans };
+    else questions.push({ id, text, options: opts, answer: ans });
 
-function processBulkInsert() {
-    const rawData = document.getElementById('bulk-input').value.trim();
-    if (!rawData) return;
-
-    const lines = rawData.split('\n');
-    let addedCount = 0;
-
-    lines.forEach((line) => {
-        const parts = line.split('\t');
-        if (parts.length < 7) return;
-
-        const q = {
-            id: Math.max(1, parseInt(parts[0].trim())),
-            text: parts[1].trim(),
-            options: [parts[2].trim(), parts[3].trim(), parts[4].trim(), parts[5].trim()],
-            answer: parseInt(parts[6].trim())
-        };
-
-        if (!isNaN(q.id) && q.text && !isNaN(q.answer)) {
-            upsertQuestion(q);
-            addedCount++;
-        }
-    });
-
-    localStorage.setItem('kobun_questions', JSON.stringify(questions));
-    renderMasterList();
-    alert(`${addedCount}件 完了`);
-    document.getElementById('bulk-input').value = '';
-}
-
-function upsertQuestion(newQ) {
-    const index = questions.findIndex(q => q.id === newQ.id);
-    if (index > -1) {
-        questions[index] = newQ;
-    } else {
-        questions.push(newQ);
-    }
     questions.sort((a, b) => a.id - b.id);
     localStorage.setItem('kobun_questions', JSON.stringify(questions));
-}
-
-function renderMasterList() {
-    const list = document.getElementById('master-list');
-    if (!list) return;
-    list.innerHTML = '';
-    questions.forEach(q => {
-        const item = document.createElement('div');
-        item.className = "flex justify-between items-center p-3 border-b border-stone-300 dark:border-stone-800 text-sm bg-opacity-50 hover:bg-stone-500/5 rounded-lg transition mb-1";
-        item.innerHTML = `
-            <span class="font-mono w-10 text-stone-500 text-[10px]">${q.id.toString().padStart(3, '0')}</span>
-            <span class="flex-1 truncate mx-2">${q.text.replace(/\*/g, '')}</span>
-            <button onclick="deleteQuestion(${q.id})" class="text-red-600 hover:opacity-70 transition px-2">削除</button>
-        `;
-        list.appendChild(item);
-    });
-    const statsEl = document.getElementById('quiz-stats');
-    if (statsEl) statsEl.innerText = `Database contains ${questions.length} questions.`;
+    renderMasterList();
+    alert("保存しました");
 }
 
 function deleteQuestion(id) {
-    if (!confirm(`No.${id} を削除？`)) return;
+    if(!confirm("削除しますか？")) return;
     questions = questions.filter(q => q.id !== id);
     localStorage.setItem('kobun_questions', JSON.stringify(questions));
     renderMasterList();
 }
 
-function resetDefault() {
-    if (!confirm("データを初期化しますか？")) return;
-    localStorage.removeItem('kobun_questions');
-    location.reload();
+function processBulkInsert() {
+    const raw = document.getElementById('bulk-input').value.trim();
+    if(!raw) return;
+    const lines = raw.split('\n');
+    lines.forEach(line => {
+        const p = line.split('\t');
+        if(p.length >= 7) {
+            const q = { id: parseInt(p[0]), text: p[1], options: [p[2], p[3], p[4], p[5]], answer: parseInt(p[6]) };
+            const idx = questions.findIndex(old => old.id === q.id);
+            if(idx > -1) questions[idx] = q; else questions.push(q);
+        }
+    });
+    questions.sort((a, b) => a.id - b.id);
+    localStorage.setItem('kobun_questions', JSON.stringify(questions));
+    renderMasterList();
+    alert("インポート完了");
 }
 
 function renderReviewList() {
     const list = document.getElementById('review-list');
-    if (!list) return;
-    list.innerHTML = '';
-    if (reviewList.length === 0) {
-        list.innerHTML = `<div class="text-center py-20 text-stone-400 font-sans tracking-widest uppercase">No Data</div>`;
-        return;
-    }
-
-    reviewList.forEach((q) => {
-        const item = document.createElement('div');
-        item.className = "p-6 border rounded-2xl bg-opacity-30 shadow-sm space-y-4 relative fade-in card";
-        const formattedText = q.text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
-        item.innerHTML = `
-            <div class="flex justify-between items-start font-sans">
-                <span class="text-[10px] font-bold bg-stone-100 dark:bg-stone-800 text-stone-500 px-3 py-1 rounded-full uppercase tracking-tighter">ID:${q.id}</span>
-                <button onclick="removeFromReview(${q.id})" class="text-[10px] text-stone-500 hover:text-stone-800 dark:hover:text-yellow-500 border border-stone-300 dark:border-stone-800 px-3 py-1 rounded-full transition">完了</button>
-            </div>
-            <p class="text-2xl leading-relaxed">${formattedText}</p>
-            <div class="pt-4 border-t border-stone-200 dark:border-stone-800 text-xs text-stone-500 font-sans">
-                <span class="bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-lg">正解: <strong class="ml-1 font-serif text-sm">${q.options[q.answer]}</strong></span>
-            </div>
-        `;
-        list.appendChild(item);
+    list.innerHTML = reviewList.length ? '' : '<p class="text-center py-10 text-stone-500">なし</p>';
+    reviewList.forEach(q => {
+        const d = document.createElement('div');
+        d.className = "card p-4 border rounded-xl text-center mb-2";
+        d.innerHTML = `<p class="text-lg">${q.text.replace(/\*/g, '')}</p><p class="text-xs text-stone-500">正解: ${q.options[q.answer]}</p>`;
+        list.appendChild(d);
     });
 }
 
-function removeFromReview(id) {
-    reviewList = reviewList.filter(q => q.id !== id);
-    localStorage.setItem('kobun_review', JSON.stringify(reviewList));
-    renderReviewList();
-}
-
-function clearReviewList() {
-    if (!confirm("復習リストをクリアしますか？")) return;
-    reviewList = [];
-    localStorage.setItem('kobun_review', JSON.stringify(reviewList));
-    renderReviewList();
-}
-
+function clearReviewList() { reviewList = []; localStorage.setItem('kobun_review', '[]'); renderReviewList(); }
+function resetDefault() { if(confirm("初期化しますか？")) { localStorage.removeItem('kobun_questions'); location.reload(); } }
 function exportData() {
-    const dataStr = JSON.stringify(questions, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kobun_data_backup.json`;
-    a.click();
+    const blob = new Blob([JSON.stringify(questions, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kobun_data.json'; a.click();
 }
 
-// Initial Run
+// Initial
 renderMasterList();
-const nextIdEl = document.getElementById('new-id');
-if (nextIdEl) {
-    nextIdEl.value = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
-}
 </script>
 </body>
 </html>
