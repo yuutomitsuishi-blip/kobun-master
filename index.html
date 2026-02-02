@@ -10,12 +10,21 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
 
-        /* 問題文の設定: 中央揃えで改行を許可 */
+        /* 問題文の設定: 1つの文として認識させ、単語途中や強調記号前後での不自然な改行を抑制 */
         #question-text {
-            word-break: break-all;
-            overflow-wrap: break-word;
+            display: block;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.8;
+            /* 日本語の単語の切れ目や強調箇所での改行を防ぎ、行末でのみ自然に折り返す設定 */
+            word-break: keep-all;      /* 禁則処理を優先し、単語の途中で切らない */
+            overflow-wrap: anywhere;   /* 必要に応じてどこでも改行を許可するが、ブラウザの自然な判断に任せる */
+            white-space: normal;       /* 複数行を許可 */
+        }
+        
+        /* 強調部分（*単語*）が改行で泣き別れないようにする */
+        .highlight {
+            display: inline-block;     /* 単語を一つの塊として扱う */
+            white-space: nowrap;       /* このスパン内での改行を禁止 */
         }
 
         /* ダークモード */
@@ -32,7 +41,6 @@
         .light-mode .card { background-color: #ffffff; border-color: #d6d3d1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .light-mode .tab-active { border-bottom: 2px solid #dc2626; color: #dc2626; }
         .light-mode input, .light-mode select, .light-mode textarea { background-color: #ffffff; color: #1c1917; border: 1px solid #d6d3d1; }
-        /* ライトモード時の選択肢ホバー視認性向上 */
         .light-mode .option-btn:hover { background-color: #e7e5e4; border-color: #a8a29e; }
 
         .custom-scroll::-webkit-scrollbar { width: 4px; }
@@ -90,7 +98,10 @@
                     <span id="quiz-progress">QUESTION 01</span>
                     <span id="quiz-score">SCORE: 0</span>
                 </div>
-                <div class="card px-6 py-12 rounded-3xl border flex items-center justify-center text-xl md:text-2xl" id="question-text"></div>
+                <!-- card内の justify-center はそのままで、内部テキストの回り込みを制御 -->
+                <div class="card px-6 py-12 rounded-3xl border flex items-center justify-center text-xl md:text-2xl" id="question-text-wrapper">
+                    <div id="question-text" class="w-full"></div>
+                </div>
                 <div class="grid grid-cols-1 gap-3" id="options-container"></div>
                 <div id="feedback" class="hidden p-4 rounded-xl text-center font-bold font-sans text-sm"></div>
                 <button id="next-btn" class="hidden w-full bg-stone-800 text-stone-100 dark:bg-stone-100 dark:text-stone-900 font-bold py-4 rounded-xl mt-4 shadow-lg hover:opacity-90 transition">次へ進む</button>
@@ -181,6 +192,11 @@ let currentIndex = 0;
 let score = 0;
 let isAnswered = false;
 
+// --- Helper Functions ---
+function formatQuestionText(text) {
+    return text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
+}
+
 // --- Theme ---
 function setTheme(theme) {
     if (theme === 'dark') {
@@ -239,8 +255,8 @@ function showQuestion() {
     document.getElementById('quiz-progress').innerText = `QUESTION ${(currentIndex + 1).toString().padStart(2, '0')}`;
     document.getElementById('quiz-score').innerText = `SCORE: ${score}`;
     
-    const formattedText = q.text.replace(/\*(.*?)\*/g, '<span class="highlight">$1</span>');
-    document.getElementById('question-text').innerHTML = formattedText;
+    // 強調単語に class="highlight" を付与
+    document.getElementById('question-text').innerHTML = formatQuestionText(q.text);
 
     const container = document.getElementById('options-container');
     container.innerHTML = '';
@@ -362,7 +378,8 @@ function renderReviewList() {
     reviewList.forEach(q => {
         const d = document.createElement('div');
         d.className = "card p-4 border rounded-xl text-center mb-2";
-        d.innerHTML = `<p class="text-lg">${q.text.replace(/\*/g, '')}</p><p class="text-xs text-stone-500">正解: ${q.options[q.answer]}</p>`;
+        // 要復習リストでも強調処理を適用
+        d.innerHTML = `<p class="text-lg">${formatQuestionText(q.text)}</p><p class="text-xs text-stone-500">正解: ${q.options[q.answer]}</p>`;
         list.appendChild(d);
     });
 }
